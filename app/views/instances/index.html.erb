@@ -126,7 +126,7 @@
                 </td>
                 <td class="px-4 py-3"><%= provider_badge(instance.provider) %></td>
                 <td class="px-4 py-3 text-sm font-medium">
-                  <%= link_to instance.instance_type, instance_path(instance), class: "text-blue-600 hover:underline" %>
+                  <%= link_to instance.instance_type, instance_path(instance), class: "text-blue-600 hover:underline", data: { turbo_frame: "_top" } %>
                 </td>
                 <td class="px-4 py-3 text-sm text-gray-500"><%= instance.family %></td>
                 <td class="px-4 py-3 text-sm text-right"><%= instance.vcpus %></td>
@@ -143,10 +143,10 @@
       <!-- Pagination -->
       <div class="bg-gray-50 px-4 py-3 border-t border-gray-200 flex items-center justify-between">
         <div class="text-sm text-gray-500">
-          <%= pagy_info(@pagy) %>
+          <%= raw pagy_info(@pagy) %>
         </div>
         <div>
-          <%== pagy_nav(@pagy) %>
+          <%= raw pagy_nav(@pagy) %>
         </div>
       </div>
     </div>
