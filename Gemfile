@@ -13,7 +13,7 @@ gem "tzinfo-data", platforms: %i[ windows jruby ]
 
 # App-specific gems
 gem "oj"
-gem "pagy", "~> 9.0"
+gem "pagy", "~> 43.4"
 gem "chartkick"
 gem "groupdate"
 gem "httparty"
