@@ -1,0 +1,85 @@
+<% content_for(:title, "Charts — Cloud Pricing") %>
+
+<div class="space-y-6">
+  <div>
+    <h1 class="text-2xl font-bold text-gray-900">Pricing Charts</h1>
+    <p class="text-sm text-gray-500 mt-1">Visual comparison of cloud instance pricing</p>
+  </div>
+
+  <!-- Scatter: vCPUs vs Price -->
+  <div class="bg-white rounded-lg border border-gray-200 p-6">
+    <h2 class="text-lg font-semibold text-gray-900 mb-4">vCPUs vs. Hourly Price</h2>
+    <div style="height: 400px;">
+      <%
+        scatter_data = @providers.map do |provider|
+          instances = @instances.select { |i| i.provider_id == provider.id }
+                                .select { |i| i.vcpus <= 96 && i.price_per_hour <= 10 }
+          {
+            name: provider.name,
+            data: instances.map { |i| [i.vcpus, i.price_per_hour.to_f.round(4)] },
+            color: provider.color
+          }
+        end
+      %>
+      <%= scatter_chart scatter_data,
+            xtitle: "vCPUs",
+            ytitle: "Price ($/hr)",
+            library: { plugins: { legend: { position: "top" } } } %>
+    </div>
+  </div>
+
+  <!-- Bar: Cheapest per vCPU tier -->
+  <div class="bg-white rounded-lg border border-gray-200 p-6">
+    <h2 class="text-lg font-semibold text-gray-900 mb-4">Cheapest Instance per vCPU Tier</h2>
+    <div style="height: 400px;">
+      <%
+        tiers = [2, 4, 8, 16, 32, 64]
+        bar_data = @providers.map do |provider|
+          provider_instances = @instances.select { |i| i.provider_id == provider.id }
+          {
+            name: provider.name,
+            data: tiers.map { |t|
+              cheapest = provider_instances.select { |i| i.vcpus == t }.min_by(&:price_per_hour)
+              ["#{t} vCPUs", cheapest&.price_per_hour&.to_f&.round(4) || 0]
+            },
+            color: provider.color
+          }
+        end
+      %>
+      <%= bar_chart bar_data,
+            xtitle: "vCPU Tier",
+            ytitle: "Price ($/hr)",
+            library: { plugins: { legend: { position: "top" } } } %>
+    </div>
+  </div>
+
+  <!-- Bar: Price per vCPU by family -->
+  <div class="bg-white rounded-lg border border-gray-200 p-6">
+    <h2 class="text-lg font-semibold text-gray-900 mb-4">Average Price per vCPU by Family</h2>
+    <div style="height: 400px;">
+      <%
+        families = @instances.map(&:family).compact.uniq.sort
+        family_data = @providers.map do |provider|
+          provider_instances = @instances.select { |i| i.provider_id == provider.id }
+          {
+            name: provider.name,
+            data: families.map { |f|
+              family_instances = provider_instances.select { |i| i.family == f }
+              avg = if family_instances.any?
+                family_instances.sum { |i| i.price_per_vcpu.to_f } / family_instances.size
+              else
+                0
+              end
+              [f, avg.round(4)]
+            },
+            color: provider.color
+          }
+        end
+      %>
+      <%= bar_chart family_data,
+            xtitle: "Instance Family",
+            ytitle: "Avg $/vCPU/hr",
+            library: { plugins: { legend: { position: "top" } } } %>
+    </div>
+  </div>
+</div>

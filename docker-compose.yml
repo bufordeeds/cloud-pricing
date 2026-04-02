@@ -1,0 +1,33 @@
+services:
+  web:
+    build: .
+    ports:
+      - "127.0.0.1:3100:3000"
+    environment:
+      DATABASE_URL: postgres://cloudpricing:${DB_PASSWORD}@db:5432/cloudpricing_production
+      RAILS_ENV: production
+      SECRET_KEY_BASE: ${SECRET_KEY_BASE}
+      RAILS_LOG_TO_STDOUT: "1"
+      RAILS_SERVE_STATIC_FILES: "1"
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  db:
+    image: postgres:16-alpine
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: cloudpricing
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: cloudpricing_production
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U cloudpricing"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+volumes:
+  pg_data:

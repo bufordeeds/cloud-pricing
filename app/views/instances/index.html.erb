@@ -1,0 +1,164 @@
+<% content_for(:title, "Cloud Pricing Comparison — Compare AWS, GCP & Azure") %>
+
+<div class="space-y-6">
+  <div>
+    <h1 class="text-2xl font-bold text-gray-900">Cloud Instance Pricing</h1>
+    <p class="text-sm text-gray-500 mt-1">Compare on-demand pricing across AWS, GCP, and Azure</p>
+  </div>
+
+  <!-- Filters -->
+  <div class="bg-white rounded-lg border border-gray-200 p-4" data-controller="filters">
+    <form action="<%= instances_path %>" method="get" data-turbo-frame="instances" data-filters-target="form">
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+        <!-- Search -->
+        <div>
+          <label class="block text-xs font-medium text-gray-700 mb-1">Search</label>
+          <input type="text" name="q" value="<%= params[:q] %>"
+            placeholder="e.g. m5.xlarge"
+            class="w-full rounded-md border-gray-300 shadow-sm text-sm focus:border-blue-500 focus:ring-blue-500"
+            data-action="input->filters#debounceSubmit">
+        </div>
+
+        <!-- Providers -->
+        <div>
+          <label class="block text-xs font-medium text-gray-700 mb-1">Providers</label>
+          <div class="flex flex-wrap gap-2">
+            <% @providers.each do |provider| %>
+              <label class="inline-flex items-center">
+                <input type="checkbox" name="providers[]" value="<%= provider.slug %>"
+                  <%= "checked" if params[:providers]&.include?(provider.slug) %>
+                  class="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  data-action="change->filters#submit">
+                <span class="ml-1 text-sm" style="color: <%= provider.color %>"><%= provider.name %></span>
+              </label>
+            <% end %>
+          </div>
+        </div>
+
+        <!-- vCPUs -->
+        <div>
+          <label class="block text-xs font-medium text-gray-700 mb-1">vCPUs</label>
+          <div class="flex items-center space-x-1">
+            <input type="number" name="vcpus_min" value="<%= params[:vcpus_min] %>" placeholder="Min"
+              class="w-20 rounded-md border-gray-300 shadow-sm text-sm focus:border-blue-500 focus:ring-blue-500"
+              data-action="change->filters#submit" min="1">
+            <span class="text-gray-400">–</span>
+            <input type="number" name="vcpus_max" value="<%= params[:vcpus_max] %>" placeholder="Max"
+              class="w-20 rounded-md border-gray-300 shadow-sm text-sm focus:border-blue-500 focus:ring-blue-500"
+              data-action="change->filters#submit" min="1">
+          </div>
+        </div>
+
+        <!-- Memory -->
+        <div>
+          <label class="block text-xs font-medium text-gray-700 mb-1">Memory (GB)</label>
+          <div class="flex items-center space-x-1">
+            <input type="number" name="memory_min" value="<%= params[:memory_min] %>" placeholder="Min"
+              class="w-20 rounded-md border-gray-300 shadow-sm text-sm focus:border-blue-500 focus:ring-blue-500"
+              data-action="change->filters#submit" min="0" step="0.5">
+            <span class="text-gray-400">–</span>
+            <input type="number" name="memory_max" value="<%= params[:memory_max] %>" placeholder="Max"
+              class="w-20 rounded-md border-gray-300 shadow-sm text-sm focus:border-blue-500 focus:ring-blue-500"
+              data-action="change->filters#submit" min="0" step="0.5">
+          </div>
+        </div>
+
+        <!-- Family -->
+        <div>
+          <label class="block text-xs font-medium text-gray-700 mb-1">Family</label>
+          <select name="family" class="w-full rounded-md border-gray-300 shadow-sm text-sm focus:border-blue-500 focus:ring-blue-500"
+            data-action="change->filters#submit">
+            <option value="">All Families</option>
+            <% @families.each do |family| %>
+              <option value="<%= family %>" <%= "selected" if params[:family] == family %>><%= family %></option>
+            <% end %>
+          </select>
+        </div>
+      </div>
+
+      <!-- Preserve sort -->
+      <input type="hidden" name="sort" value="<%= params[:sort] %>">
+      <input type="hidden" name="direction" value="<%= params[:direction] %>">
+    </form>
+  </div>
+
+  <!-- Results -->
+  <turbo-frame id="instances">
+    <div class="bg-white rounded-lg border border-gray-200 overflow-hidden">
+      <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200">
+          <thead class="bg-gray-50">
+            <tr>
+              <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-8">
+                <input type="checkbox" data-controller="select-all" data-action="change->select-all#toggleAll"
+                  class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+              </th>
+              <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Provider</th>
+              <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <%= sort_link "Instance Type", "instance_type", params[:sort], params[:direction] %>
+              </th>
+              <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Family</th>
+              <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <%= sort_link "vCPUs", "vcpus", params[:sort], params[:direction] %>
+              </th>
+              <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <%= sort_link "Memory", "memory", params[:sort], params[:direction] %>
+              </th>
+              <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <%= sort_link "Hourly", "price", params[:sort], params[:direction] %>
+              </th>
+              <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <%= sort_link "Monthly", "price", params[:sort], params[:direction] %>
+              </th>
+              <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <%= sort_link "$/vCPU", "price_per_vcpu", params[:sort], params[:direction] %>
+              </th>
+            </tr>
+          </thead>
+          <tbody class="bg-white divide-y divide-gray-200" data-controller="compare-select">
+            <% @instances.each do |instance| %>
+              <tr class="hover:bg-gray-50">
+                <td class="px-4 py-3">
+                  <input type="checkbox" value="<%= instance.id %>"
+                    data-compare-select-target="checkbox"
+                    data-action="change->compare-select#updateCompare"
+                    class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                </td>
+                <td class="px-4 py-3"><%= provider_badge(instance.provider) %></td>
+                <td class="px-4 py-3 text-sm font-medium">
+                  <%= link_to instance.instance_type, instance_path(instance), class: "text-blue-600 hover:underline" %>
+                </td>
+                <td class="px-4 py-3 text-sm text-gray-500"><%= instance.family %></td>
+                <td class="px-4 py-3 text-sm text-right"><%= instance.vcpus %></td>
+                <td class="px-4 py-3 text-sm text-right"><%= sprintf('%.1f', instance.memory_gb) %> GB</td>
+                <td class="px-4 py-3 text-sm text-right font-mono"><%= format_price(instance.price_per_hour) %></td>
+                <td class="px-4 py-3 text-sm text-right font-mono"><%= format_monthly(instance.price_per_hour) %></td>
+                <td class="px-4 py-3 text-sm text-right font-mono"><%= format_price(instance.price_per_vcpu) %></td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Pagination -->
+      <div class="bg-gray-50 px-4 py-3 border-t border-gray-200 flex items-center justify-between">
+        <div class="text-sm text-gray-500">
+          <%= pagy_info(@pagy) %>
+        </div>
+        <div>
+          <%== pagy_nav(@pagy) %>
+        </div>
+      </div>
+    </div>
+
+    <!-- Compare button (floating) -->
+    <div id="compare-bar" class="hidden fixed bottom-4 left-1/2 transform -translate-x-1/2 bg-gray-900 text-white rounded-lg shadow-lg px-6 py-3 flex items-center space-x-4 z-50"
+      data-compare-select-target="bar">
+      <span data-compare-select-target="count">0</span> selected
+      <a href="#" data-compare-select-target="link" data-action="click->compare-select#goCompare"
+        class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-1.5 rounded text-sm font-medium">
+        Compare
+      </a>
+    </div>
+  </turbo-frame>
+</div>

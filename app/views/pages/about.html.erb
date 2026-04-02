@@ -1,0 +1,93 @@
+<% content_for(:title, "About — Cloud Pricing") %>
+
+<div class="max-w-3xl space-y-8">
+  <div>
+    <h1 class="text-2xl font-bold text-gray-900">About CloudPricing</h1>
+    <p class="text-gray-600 mt-2">
+      CloudPricing is a comparison tool that aggregates public cloud pricing data from
+      AWS, GCP, and Azure into a single, filterable dashboard. It lets you quickly find
+      and compare on-demand instance pricing across providers.
+    </p>
+  </div>
+
+  <div>
+    <h2 class="text-lg font-semibold text-gray-900 mb-3">Tech Stack</h2>
+    <ul class="space-y-2 text-gray-600">
+      <li class="flex items-start">
+        <span class="font-medium text-gray-900 w-32 shrink-0">Backend</span>
+        <span>Ruby on Rails 7.2, PostgreSQL</span>
+      </li>
+      <li class="flex items-start">
+        <span class="font-medium text-gray-900 w-32 shrink-0">Frontend</span>
+        <span>Hotwire (Turbo + Stimulus), Tailwind CSS, Chartkick + Chart.js</span>
+      </li>
+      <li class="flex items-start">
+        <span class="font-medium text-gray-900 w-32 shrink-0">Infrastructure</span>
+        <span>Docker Compose, Caddy reverse proxy, Hetzner VPS</span>
+      </li>
+      <li class="flex items-start">
+        <span class="font-medium text-gray-900 w-32 shrink-0">Testing</span>
+        <span>RSpec, FactoryBot</span>
+      </li>
+    </ul>
+  </div>
+
+  <div>
+    <h2 class="text-lg font-semibold text-gray-900 mb-3">Data Sources</h2>
+    <div class="space-y-4">
+      <% @providers.each do |provider| %>
+        <div class="flex items-start space-x-3">
+          <%= provider_badge(provider) %>
+          <div>
+            <% case provider.slug %>
+            <% when "aws" %>
+              <p class="text-sm text-gray-600">
+                <a href="https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonEC2/current/us-east-1/index.json"
+                   class="text-blue-600 hover:underline" target="_blank">AWS EC2 Bulk Pricing API</a>
+                — On-demand Linux instances in us-east-1
+              </p>
+            <% when "gcp" %>
+              <p class="text-sm text-gray-600">
+                <a href="https://cloudpricingcalculator.appspot.com/static/data/pricelist.json"
+                   class="text-blue-600 hover:underline" target="_blank">GCP Cloud Pricing Calculator</a>
+                — Compute Engine instances in us-central1
+              </p>
+            <% when "azure" %>
+              <p class="text-sm text-gray-600">
+                <a href="https://prices.azure.com/api/retail/prices"
+                   class="text-blue-600 hover:underline" target="_blank">Azure Retail Prices API</a>
+                — Virtual Machines in East US
+              </p>
+            <% end %>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  </div>
+
+  <% if @last_imports.any? %>
+    <div>
+      <h2 class="text-lg font-semibold text-gray-900 mb-3">Last Data Import</h2>
+      <div class="bg-gray-50 rounded-lg p-4 space-y-2">
+        <% @last_imports.each do |_id, import| %>
+          <div class="flex items-center justify-between text-sm">
+            <span class="font-medium"><%= import.provider.name %></span>
+            <span class="text-gray-500">
+              <%= import.records_imported %> instances ·
+              <%= time_ago_in_words(import.completed_at) %> ago
+            </span>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  <% end %>
+
+  <div>
+    <h2 class="text-lg font-semibold text-gray-900 mb-3">About the Author</h2>
+    <p class="text-gray-600">
+      Built by <a href="https://buford.dev" class="text-blue-600 hover:underline" target="_blank">Buford Eeds</a>
+      as a portfolio project demonstrating Rails proficiency. The source code is available on
+      <a href="https://github.com/bufordeeds/cloud-pricing" class="text-blue-600 hover:underline" target="_blank">GitHub</a>.
+    </p>
+  </div>
+</div>

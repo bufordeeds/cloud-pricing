@@ -1,0 +1,94 @@
+<% content_for(:title, "Compare Instances — Cloud Pricing") %>
+
+<div class="space-y-6">
+  <div class="flex items-center justify-between">
+    <div>
+      <h1 class="text-2xl font-bold text-gray-900">Compare Instances</h1>
+      <p class="text-sm text-gray-500 mt-1">Side-by-side comparison of <%= @instances.size %> instances</p>
+    </div>
+    <%= link_to "← Back to instances", instances_path, class: "text-sm text-blue-600 hover:underline" %>
+  </div>
+
+  <div class="bg-white rounded-lg border border-gray-200 overflow-hidden">
+    <table class="min-w-full">
+      <thead>
+        <tr class="border-b border-gray-200">
+          <th class="px-6 py-4 text-left text-sm font-medium text-gray-500 bg-gray-50 w-40"></th>
+          <% @instances.each do |instance| %>
+            <th class="px-6 py-4 text-center">
+              <div class="space-y-1">
+                <%= provider_badge(instance.provider) %>
+                <p class="text-lg font-bold text-gray-900"><%= instance.instance_type %></p>
+              </div>
+            </th>
+          <% end %>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-gray-200">
+        <tr>
+          <td class="px-6 py-4 text-sm font-medium text-gray-500 bg-gray-50">Family</td>
+          <% @instances.each do |i| %>
+            <td class="px-6 py-4 text-center text-sm"><%= i.family %></td>
+          <% end %>
+        </tr>
+        <tr>
+          <td class="px-6 py-4 text-sm font-medium text-gray-500 bg-gray-50">vCPUs</td>
+          <% @instances.each do |i| %>
+            <td class="px-6 py-4 text-center text-sm font-semibold"><%= i.vcpus %></td>
+          <% end %>
+        </tr>
+        <tr>
+          <td class="px-6 py-4 text-sm font-medium text-gray-500 bg-gray-50">Memory</td>
+          <% @instances.each do |i| %>
+            <td class="px-6 py-4 text-center text-sm font-semibold"><%= sprintf('%.1f', i.memory_gb) %> GB</td>
+          <% end %>
+        </tr>
+        <tr>
+          <td class="px-6 py-4 text-sm font-medium text-gray-500 bg-gray-50">Region</td>
+          <% @instances.each do |i| %>
+            <td class="px-6 py-4 text-center text-sm"><%= i.region %></td>
+          <% end %>
+        </tr>
+        <tr class="bg-blue-50">
+          <td class="px-6 py-4 text-sm font-medium text-gray-700 bg-blue-100">Hourly Price</td>
+          <% min_price = @instances.map(&:price_per_hour).min %>
+          <% @instances.each do |i| %>
+            <td class="px-6 py-4 text-center text-lg font-bold font-mono <%= 'text-green-600' if i.price_per_hour == min_price %>">
+              <%= format_price(i.price_per_hour) %>
+            </td>
+          <% end %>
+        </tr>
+        <tr>
+          <td class="px-6 py-4 text-sm font-medium text-gray-500 bg-gray-50">Monthly Cost</td>
+          <% @instances.each do |i| %>
+            <td class="px-6 py-4 text-center text-sm font-mono font-semibold"><%= format_monthly(i.price_per_hour) %></td>
+          <% end %>
+        </tr>
+        <tr>
+          <td class="px-6 py-4 text-sm font-medium text-gray-500 bg-gray-50">Price/vCPU</td>
+          <% min_cpu = @instances.map(&:price_per_vcpu).min %>
+          <% @instances.each do |i| %>
+            <td class="px-6 py-4 text-center text-sm font-mono <%= 'text-green-600 font-semibold' if i.price_per_vcpu == min_cpu %>">
+              <%= format_price(i.price_per_vcpu) %>
+            </td>
+          <% end %>
+        </tr>
+        <tr>
+          <td class="px-6 py-4 text-sm font-medium text-gray-500 bg-gray-50">Price/GB Memory</td>
+          <% min_mem = @instances.map(&:price_per_gb_memory).min %>
+          <% @instances.each do |i| %>
+            <td class="px-6 py-4 text-center text-sm font-mono <%= 'text-green-600 font-semibold' if i.price_per_gb_memory == min_mem %>">
+              <%= format_price(i.price_per_gb_memory) %>
+            </td>
+          <% end %>
+        </tr>
+        <tr>
+          <td class="px-6 py-4 text-sm font-medium text-gray-500 bg-gray-50">Annual Cost</td>
+          <% @instances.each do |i| %>
+            <td class="px-6 py-4 text-center text-sm font-mono">$<%= sprintf('%.2f', i.price_per_hour * 8760) %></td>
+          <% end %>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

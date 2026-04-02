@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+  <head>
+    <title><%= content_for(:title) || "Cloud Pricing Comparison" %></title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="description" content="Compare cloud instance pricing across AWS, GCP, and Azure">
+    <%= csrf_meta_tags %>
+    <%= csp_meta_tag %>
+    <%= stylesheet_link_tag "tailwind", "data-turbo-track": "reload" %>
+    <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
+    <%= javascript_importmap_tags %>
+  </head>
+
+  <body class="h-full bg-gray-50 text-gray-900">
+    <nav class="bg-white border-b border-gray-200">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between h-14">
+          <div class="flex items-center space-x-8">
+            <%= link_to root_path, class: "flex items-center space-x-2 text-gray-900 hover:text-gray-700" do %>
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z"/>
+              </svg>
+              <span class="font-semibold text-lg">CloudPricing</span>
+            <% end %>
+            <div class="hidden sm:flex items-center space-x-4">
+              <%= link_to "Instances", instances_path, class: "text-sm #{request.path == instances_path ? 'text-blue-600 font-medium' : 'text-gray-600 hover:text-gray-900'}" %>
+              <%= link_to "Charts", charts_path, class: "text-sm #{request.path == charts_path ? 'text-blue-600 font-medium' : 'text-gray-600 hover:text-gray-900'}" %>
+              <%= link_to "About", about_path, class: "text-sm #{request.path == about_path ? 'text-blue-600 font-medium' : 'text-gray-600 hover:text-gray-900'}" %>
+            </div>
+          </div>
+          <div class="flex items-center">
+            <span class="text-xs text-gray-400"><%= Instance.count %> instances indexed</span>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <% if flash[:alert] %>
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4">
+        <div class="bg-yellow-50 border border-yellow-200 text-yellow-800 px-4 py-3 rounded text-sm">
+          <%= flash[:alert] %>
+        </div>
+      </div>
+    <% end %>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <%= yield %>
+    </main>
+
+    <footer class="bg-white border-t border-gray-200 mt-auto">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div class="flex flex-col sm:flex-row justify-between items-center text-sm text-gray-500">
+          <p>Built by <a href="https://buford.dev" class="text-blue-600 hover:underline" target="_blank">Buford Eeds</a></p>
+          <div class="flex space-x-4 mt-2 sm:mt-0">
+            <a href="https://github.com/bufordeeds/cloud-pricing" class="hover:text-gray-700" target="_blank">GitHub</a>
+            <a href="https://buford.dev" class="hover:text-gray-700" target="_blank">buford.dev</a>
+            <a href="https://linkedin.com/in/bufordeeds" class="hover:text-gray-700" target="_blank">LinkedIn</a>
+          </div>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>
