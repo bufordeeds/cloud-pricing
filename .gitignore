@@ -6,15 +6,8 @@
 !/.env.example
 
 # Ignore all logfiles and tempfiles.
-/log/*
-/tmp/*
-!/log/.keep
-!/tmp/.keep
-
-# Ignore pidfiles.
-/tmp/pids/*
-!/tmp/pids/
-!/tmp/pids/.keep
+/log/
+/tmp/
 
 # Ignore storage.
 /storage/*
