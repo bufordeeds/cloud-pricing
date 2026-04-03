@@ -1,0 +1,46 @@
+Your CloudPricing API Key
+========================
+
+Hi <%= @api_key.name %>,
+
+Your API access request has been approved. Here's your key:
+
+  <%= @token %>
+
+SAVE THIS KEY NOW. It won't be shown again. If you lose it, you'll need to request a new one.
+
+Quick Start
+-----------
+
+List LLM models:
+
+  curl -H "Authorization: Bearer <%= @token %>" \
+    <%= @base_url %>/api/v1/llm_models
+
+List cloud instances:
+
+  curl -H "Authorization: Bearer <%= @token %>" \
+    <%= @base_url %>/api/v1/instances
+
+Filter by provider:
+
+  curl -H "Authorization: Bearer <%= @token %>" \
+    "<%= @base_url %>/api/v1/instances?providers[]=aws&vcpus_min=4"
+
+Endpoints
+---------
+
+  GET /api/v1/instances        — Cloud instances (filterable)
+  GET /api/v1/instances/:id    — Instance detail
+  GET /api/v1/llm_models       — LLM models (filterable)
+  GET /api/v1/llm_models/:id   — Model detail
+  GET /api/v1/providers        — Cloud providers
+  GET /api/v1/llm_providers    — LLM providers
+
+Rate Limits
+-----------
+
+100 requests per minute. Check X-RateLimit-Remaining in response headers.
+
+Happy building!
+CloudPricing

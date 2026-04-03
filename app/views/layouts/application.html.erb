@@ -27,6 +27,7 @@
               <%= link_to "Models", llm_models_path, class: "text-sm #{request.path.start_with?('/llm_models') ? 'text-blue-600 font-medium' : 'text-gray-600 hover:text-gray-900'}" %>
               <%= link_to "Charts", charts_path, class: "text-sm #{request.path == charts_path ? 'text-blue-600 font-medium' : 'text-gray-600 hover:text-gray-900'}" %>
               <%= link_to "About", about_path, class: "text-sm #{request.path == about_path ? 'text-blue-600 font-medium' : 'text-gray-600 hover:text-gray-900'}" %>
+              <%= link_to "API", new_api_key_request_path, class: "text-sm #{request.path.start_with?('/api-access') ? 'text-blue-600 font-medium' : 'text-gray-600 hover:text-gray-900'}" %>
             </div>
           </div>
           <div class="flex items-center">

@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+  <head>
+    <title>Admin — CloudPricing</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <%= csrf_meta_tags %>
+    <%= csp_meta_tag %>
+    <%= stylesheet_link_tag "tailwind", "data-turbo-track": "reload" %>
+    <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
+  </head>
+
+  <body class="h-full bg-gray-50 text-gray-900">
+    <nav class="bg-gray-800">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between h-14">
+          <div class="flex items-center space-x-8">
+            <span class="text-white font-semibold">CloudPricing Admin</span>
+            <%= link_to "API Keys", admin_api_keys_path, class: "text-gray-300 hover:text-white text-sm" %>
+          </div>
+          <div class="flex items-center">
+            <%= link_to "Back to site", root_path, class: "text-gray-400 hover:text-white text-sm" %>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <% if flash[:notice] %>
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4">
+        <div class="bg-green-50 border border-green-200 text-green-800 px-4 py-3 rounded text-sm">
+          <%= flash[:notice] %>
+        </div>
+      </div>
+    <% end %>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <%= yield %>
+    </main>
+  </body>
+</html>
