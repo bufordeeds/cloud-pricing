@@ -1,7 +1,7 @@
 class LlmModel < ApplicationRecord
   belongs_to :llm_provider
 
-  validates :model_name, presence: true
+  validates :name, presence: true
   validates :model_id, presence: true, uniqueness: { scope: [ :llm_provider_id ] }
   validates :input_price_per_mtok, presence: true, numericality: { greater_than_or_equal_to: 0 }
   validates :output_price_per_mtok, presence: true, numericality: { greater_than_or_equal_to: 0 }
@@ -13,7 +13,7 @@ class LlmModel < ApplicationRecord
 
   scope :search, ->(query) {
     return all if query.blank?
-    where("model_name ILIKE ?", "%#{sanitize_sql_like(query)}%")
+    where("name ILIKE ?", "%#{sanitize_sql_like(query)}%")
   }
 
   scope :by_context_window, ->(min, max) {
@@ -33,8 +33,8 @@ class LlmModel < ApplicationRecord
       order(output_price_per_mtok: direction)
     when "context"
       order(context_window: direction)
-    when "model_name"
-      order(model_name: direction)
+    when "name"
+      order(name: direction)
     when "blended_price"
       order(Arel.sql("(input_price_per_mtok + output_price_per_mtok) / 2 #{direction}"))
     else

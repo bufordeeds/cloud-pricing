@@ -1,4 +1,4 @@
-<% content_for(:title, "#{@llm_model.model_name} — #{@llm_model.llm_provider.name} Pricing") %>
+<% content_for(:title, "#{@llm_model.name} — #{@llm_model.llm_provider.name} Pricing") %>
 
 <div class="space-y-6">
   <div class="flex items-center space-x-2 text-sm text-gray-500">
@@ -10,7 +10,7 @@
       <div class="flex items-center justify-between mb-6">
         <div>
           <div class="flex items-center space-x-3">
-            <h1 class="text-2xl font-bold text-gray-900"><%= @llm_model.model_name %></h1>
+            <h1 class="text-2xl font-bold text-gray-900"><%= @llm_model.name %></h1>
             <%= llm_provider_badge(@llm_model.llm_provider) %>
           </div>
           <p class="text-sm text-gray-500 mt-1"><code class="bg-gray-100 px-1.5 py-0.5 rounded text-xs"><%= @llm_model.model_id %></code></p>
@@ -85,7 +85,7 @@
             <tr class="hover:bg-gray-50">
               <td class="px-4 py-3"><%= llm_provider_badge(model.llm_provider) %></td>
               <td class="px-4 py-3 text-sm font-medium">
-                <%= link_to model.model_name, llm_model_path(model), class: "text-blue-600 hover:underline" %>
+                <%= link_to model.name, llm_model_path(model), class: "text-blue-600 hover:underline" %>
               </td>
               <td class="px-4 py-3 text-sm text-right"><%= format_context_window(model.context_window) %></td>
               <td class="px-4 py-3 text-sm text-right font-mono"><%= format_token_price(model.input_price_per_mtok) %></td>

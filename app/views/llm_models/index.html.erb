@@ -67,7 +67,7 @@
             <tr>
               <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Provider</th>
               <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                <%= llm_sort_link "Model", "model_name", params[:sort], params[:direction] %>
+                <%= llm_sort_link "Model", "name", params[:sort], params[:direction] %>
               </th>
               <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                 <%= llm_sort_link "Context", "context", params[:sort], params[:direction] %>
@@ -89,7 +89,7 @@
               <tr class="hover:bg-gray-50">
                 <td class="px-4 py-3"><%= llm_provider_badge(model.llm_provider) %></td>
                 <td class="px-4 py-3 text-sm font-medium">
-                  <%= link_to model.model_name, llm_model_path(model), class: "text-blue-600 hover:underline", data: { turbo_frame: "_top" } %>
+                  <%= link_to model.name, llm_model_path(model), class: "text-blue-600 hover:underline", data: { turbo_frame: "_top" } %>
                 </td>
                 <td class="px-4 py-3 text-sm text-right"><%= format_context_window(model.context_window) %></td>
                 <td class="px-4 py-3 text-sm text-right font-mono"><%= format_token_price(model.input_price_per_mtok) %></td>
