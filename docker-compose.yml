@@ -10,6 +10,9 @@ services:
       RAILS_LOG_TO_STDOUT: "1"
       RAILS_SERVE_STATIC_FILES: "1"
       GCP_API_KEY: ${GCP_API_KEY}
+    networks:
+      - default
+      - web
     depends_on:
       db:
         condition: service_healthy
@@ -29,6 +32,10 @@ services:
       timeout: 5s
       retries: 5
     restart: unless-stopped
+
+networks:
+  web:
+    external: true
 
 volumes:
   pg_data:
