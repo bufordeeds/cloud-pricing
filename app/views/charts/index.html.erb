@@ -24,17 +24,21 @@
       <%= scatter_chart scatter_data,
             xtitle: "vCPUs",
             ytitle: "Price ($/hr)",
-            library: { plugins: { legend: { position: "top" } } } %>
+            library: {
+              plugins: { legend: { position: "top" },
+                         tooltip: { callbacks: { label: true } } },
+              elements: { point: { radius: 3, hoverRadius: 5 } }
+            } %>
     </div>
   </div>
 
-  <!-- Bar: Cheapest per vCPU tier -->
+  <!-- Bar: Cheapest per vCPU tier (vertical grouped) -->
   <div class="bg-white rounded-lg border border-gray-200 p-6">
     <h2 class="text-lg font-semibold text-gray-900 mb-4">Cheapest Instance per vCPU Tier</h2>
     <div style="height: 400px;">
       <%
         tiers = [2, 4, 8, 16, 32, 64]
-        bar_data = @providers.map do |provider|
+        tier_data = @providers.map do |provider|
           provider_instances = @instances.select { |i| i.provider_id == provider.id }
           {
             name: provider.name,
@@ -46,19 +50,23 @@
           }
         end
       %>
-      <%= bar_chart bar_data,
-            xtitle: "vCPU Tier",
+      <%= column_chart tier_data,
             ytitle: "Price ($/hr)",
             library: { plugins: { legend: { position: "top" } } } %>
     </div>
   </div>
 
-  <!-- Bar: Price per vCPU by family -->
+  <!-- Bar: Price per vCPU by family (only families with 2+ providers) -->
   <div class="bg-white rounded-lg border border-gray-200 p-6">
     <h2 class="text-lg font-semibold text-gray-900 mb-4">Average Price per vCPU by Family</h2>
     <div style="height: 400px;">
       <%
-        families = @instances.map(&:family).compact.uniq.sort
+        all_families = @instances.map(&:family).compact.uniq
+        # Only show families that have instances from at least 2 providers
+        families = all_families.select { |f|
+          @providers.count { |p| @instances.any? { |i| i.provider_id == p.id && i.family == f } } >= 2
+        }.sort
+
         family_data = @providers.map do |provider|
           provider_instances = @instances.select { |i| i.provider_id == provider.id }
           {
@@ -76,8 +84,7 @@
           }
         end
       %>
-      <%= bar_chart family_data,
-            xtitle: "Instance Family",
+      <%= column_chart family_data,
             ytitle: "Avg $/vCPU/hr",
             library: { plugins: { legend: { position: "top" } } } %>
     </div>

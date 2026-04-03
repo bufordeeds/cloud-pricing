@@ -8,7 +8,7 @@ class Provider < ApplicationRecord
   def self.seed!
     [
       { name: "AWS", slug: "aws", color: "#FF9900" },
-      { name: "GCP", slug: "gcp", color: "#4285F4" },
+      { name: "GCP", slug: "gcp", color: "#34A853" },
       { name: "Azure", slug: "azure", color: "#0078D4" }
     ].each do |attrs|
       find_or_create_by!(slug: attrs[:slug]) do |p|
