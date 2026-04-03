@@ -24,12 +24,13 @@
             <% end %>
             <div class="hidden sm:flex items-center space-x-4">
               <%= link_to "Instances", instances_path, class: "text-sm #{request.path == instances_path ? 'text-blue-600 font-medium' : 'text-gray-600 hover:text-gray-900'}" %>
+              <%= link_to "Models", llm_models_path, class: "text-sm #{request.path.start_with?('/llm_models') ? 'text-blue-600 font-medium' : 'text-gray-600 hover:text-gray-900'}" %>
               <%= link_to "Charts", charts_path, class: "text-sm #{request.path == charts_path ? 'text-blue-600 font-medium' : 'text-gray-600 hover:text-gray-900'}" %>
               <%= link_to "About", about_path, class: "text-sm #{request.path == about_path ? 'text-blue-600 font-medium' : 'text-gray-600 hover:text-gray-900'}" %>
             </div>
           </div>
           <div class="flex items-center">
-            <span class="text-xs text-gray-400"><%= Instance.count %> instances indexed</span>
+            <span class="text-xs text-gray-400"><%= Instance.count %> instances · <%= LlmModel.count %> models</span>
           </div>
         </div>
       </div>

@@ -1,0 +1,100 @@
+<% content_for(:title, "#{@llm_model.model_name} — #{@llm_model.llm_provider.name} Pricing") %>
+
+<div class="space-y-6">
+  <div class="flex items-center space-x-2 text-sm text-gray-500">
+    <%= link_to "← Back to models", llm_models_path, class: "hover:text-gray-700" %>
+  </div>
+
+  <div class="bg-white rounded-lg border border-gray-200 overflow-hidden">
+    <div class="p-6">
+      <div class="flex items-center justify-between mb-6">
+        <div>
+          <div class="flex items-center space-x-3">
+            <h1 class="text-2xl font-bold text-gray-900"><%= @llm_model.model_name %></h1>
+            <%= llm_provider_badge(@llm_model.llm_provider) %>
+          </div>
+          <p class="text-sm text-gray-500 mt-1"><code class="bg-gray-100 px-1.5 py-0.5 rounded text-xs"><%= @llm_model.model_id %></code></p>
+        </div>
+        <div class="text-right">
+          <p class="text-sm text-gray-500">Input</p>
+          <p class="text-2xl font-bold text-gray-900"><%= format_token_price(@llm_model.input_price_per_mtok) %><span class="text-sm font-normal text-gray-500">/MTok</span></p>
+          <p class="text-sm text-gray-500 mt-2">Output</p>
+          <p class="text-2xl font-bold text-gray-900"><%= format_token_price(@llm_model.output_price_per_mtok) %><span class="text-sm font-normal text-gray-500">/MTok</span></p>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+        <div class="bg-gray-50 rounded-lg p-4">
+          <p class="text-xs font-medium text-gray-500 uppercase">Context Window</p>
+          <p class="text-2xl font-bold text-gray-900 mt-1"><%= format_context_window(@llm_model.context_window) %></p>
+        </div>
+        <div class="bg-gray-50 rounded-lg p-4">
+          <p class="text-xs font-medium text-gray-500 uppercase">Max Output</p>
+          <p class="text-2xl font-bold text-gray-900 mt-1"><%= number_with_delimiter(@llm_model.max_output_tokens) %></p>
+        </div>
+        <div class="bg-gray-50 rounded-lg p-4">
+          <p class="text-xs font-medium text-gray-500 uppercase">Blended $/MTok</p>
+          <p class="text-2xl font-bold text-gray-900 mt-1"><%= format_token_price(@llm_model.blended_price_per_mtok) %></p>
+        </div>
+        <div class="bg-gray-50 rounded-lg p-4">
+          <p class="text-xs font-medium text-gray-500 uppercase">Capabilities</p>
+          <div class="mt-2"><%= capability_badges(@llm_model) %></div>
+        </div>
+      </div>
+
+      <!-- Cost Estimator -->
+      <div class="mt-6 bg-blue-50 rounded-lg p-4">
+        <h3 class="text-sm font-semibold text-blue-900 mb-3">Cost Estimator</h3>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+          <div>
+            <p class="text-blue-700">1k in / 1k out per request</p>
+            <p class="text-lg font-bold text-blue-900"><%= format_token_price(@llm_model.cost_per_request(input_tokens: 1000, output_tokens: 1000)) %></p>
+          </div>
+          <div>
+            <p class="text-blue-700">100 requests/day (1k/1k)</p>
+            <p class="text-lg font-bold text-blue-900">$<%= sprintf('%.2f', @llm_model.monthly_cost(requests_per_day: 100, avg_input: 1000, avg_output: 1000)) %><span class="text-sm font-normal">/mo</span></p>
+          </div>
+          <div>
+            <p class="text-blue-700">1000 requests/day (2k/2k)</p>
+            <p class="text-lg font-bold text-blue-900">$<%= sprintf('%.2f', @llm_model.monthly_cost(requests_per_day: 1000, avg_input: 2000, avg_output: 2000)) %><span class="text-sm font-normal">/mo</span></p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <% if @similar.any? %>
+    <div class="bg-white rounded-lg border border-gray-200 overflow-hidden">
+      <div class="p-4 border-b border-gray-200">
+        <h2 class="text-lg font-semibold text-gray-900">Similar Models</h2>
+        <p class="text-sm text-gray-500">Models in a similar price range</p>
+      </div>
+      <table class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-gray-50">
+          <tr>
+            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Provider</th>
+            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Model</th>
+            <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Context</th>
+            <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Input $/MTok</th>
+            <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Output $/MTok</th>
+            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Capabilities</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-200">
+          <% @similar.each do |model| %>
+            <tr class="hover:bg-gray-50">
+              <td class="px-4 py-3"><%= llm_provider_badge(model.llm_provider) %></td>
+              <td class="px-4 py-3 text-sm font-medium">
+                <%= link_to model.model_name, llm_model_path(model), class: "text-blue-600 hover:underline" %>
+              </td>
+              <td class="px-4 py-3 text-sm text-right"><%= format_context_window(model.context_window) %></td>
+              <td class="px-4 py-3 text-sm text-right font-mono"><%= format_token_price(model.input_price_per_mtok) %></td>
+              <td class="px-4 py-3 text-sm text-right font-mono"><%= format_token_price(model.output_price_per_mtok) %></td>
+              <td class="px-4 py-3"><%= capability_badges(model) %></td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  <% end %>
+</div>

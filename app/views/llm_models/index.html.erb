@@ -1,0 +1,116 @@
+<% content_for(:title, "LLM Model Pricing — Compare AI Model Costs") %>
+
+<div class="space-y-6">
+  <div>
+    <h1 class="text-2xl font-bold text-gray-900">LLM Model Pricing</h1>
+    <p class="text-sm text-gray-500 mt-1">Compare API pricing across Anthropic, OpenAI, Google, Meta, and Mistral</p>
+  </div>
+
+  <!-- Filters -->
+  <div class="bg-white rounded-lg border border-gray-200 p-4" data-controller="filters">
+    <form action="<%= llm_models_path %>" method="get" data-turbo-frame="llm-models" data-filters-target="form">
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <!-- Search -->
+        <div>
+          <label class="block text-xs font-medium text-gray-700 mb-1">Search</label>
+          <input type="text" name="q" value="<%= params[:q] %>"
+            placeholder="e.g. Claude, GPT, Gemini"
+            class="w-full rounded-md border-gray-300 shadow-sm text-sm focus:border-blue-500 focus:ring-blue-500"
+            data-action="input->filters#debounceSubmit">
+        </div>
+
+        <!-- Providers -->
+        <div>
+          <label class="block text-xs font-medium text-gray-700 mb-1">Providers</label>
+          <div class="flex flex-wrap gap-2">
+            <% @providers.each do |provider| %>
+              <label class="inline-flex items-center">
+                <input type="checkbox" name="providers[]" value="<%= provider.slug %>"
+                  <%= "checked" if params[:providers]&.include?(provider.slug) %>
+                  class="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  data-action="change->filters#submit">
+                <span class="ml-1 text-sm" style="color: <%= provider.color %>"><%= provider.name %></span>
+              </label>
+            <% end %>
+          </div>
+        </div>
+
+        <!-- Context Window -->
+        <div>
+          <label class="block text-xs font-medium text-gray-700 mb-1">Context (k tokens)</label>
+          <div class="flex items-center space-x-1">
+            <input type="number" name="context_min" value="<%= params[:context_min] %>" placeholder="Min"
+              class="w-20 rounded-md border-gray-300 shadow-sm text-sm focus:border-blue-500 focus:ring-blue-500"
+              data-action="change->filters#submit" min="1">
+            <span class="text-gray-400">–</span>
+            <input type="number" name="context_max" value="<%= params[:context_max] %>" placeholder="Max"
+              class="w-20 rounded-md border-gray-300 shadow-sm text-sm focus:border-blue-500 focus:ring-blue-500"
+              data-action="change->filters#submit" min="1">
+          </div>
+        </div>
+
+        <div></div>
+      </div>
+
+      <!-- Preserve sort -->
+      <input type="hidden" name="sort" value="<%= params[:sort] %>">
+      <input type="hidden" name="direction" value="<%= params[:direction] %>">
+    </form>
+  </div>
+
+  <!-- Results -->
+  <turbo-frame id="llm-models">
+    <div class="bg-white rounded-lg border border-gray-200 overflow-hidden">
+      <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200">
+          <thead class="bg-gray-50">
+            <tr>
+              <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Provider</th>
+              <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <%= llm_sort_link "Model", "model_name", params[:sort], params[:direction] %>
+              </th>
+              <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <%= llm_sort_link "Context", "context", params[:sort], params[:direction] %>
+              </th>
+              <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <%= llm_sort_link "Input $/MTok", "input_price", params[:sort], params[:direction] %>
+              </th>
+              <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <%= llm_sort_link "Output $/MTok", "output_price", params[:sort], params[:direction] %>
+              </th>
+              <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <%= llm_sort_link "Blended $/MTok", "blended_price", params[:sort], params[:direction] %>
+              </th>
+              <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Capabilities</th>
+            </tr>
+          </thead>
+          <tbody class="bg-white divide-y divide-gray-200">
+            <% @llm_models.each do |model| %>
+              <tr class="hover:bg-gray-50">
+                <td class="px-4 py-3"><%= llm_provider_badge(model.llm_provider) %></td>
+                <td class="px-4 py-3 text-sm font-medium">
+                  <%= link_to model.model_name, llm_model_path(model), class: "text-blue-600 hover:underline", data: { turbo_frame: "_top" } %>
+                </td>
+                <td class="px-4 py-3 text-sm text-right"><%= format_context_window(model.context_window) %></td>
+                <td class="px-4 py-3 text-sm text-right font-mono"><%= format_token_price(model.input_price_per_mtok) %></td>
+                <td class="px-4 py-3 text-sm text-right font-mono"><%= format_token_price(model.output_price_per_mtok) %></td>
+                <td class="px-4 py-3 text-sm text-right font-mono"><%= format_token_price(model.blended_price_per_mtok) %></td>
+                <td class="px-4 py-3"><%= capability_badges(model) %></td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Pagination -->
+      <div class="bg-gray-50 px-4 py-3 border-t border-gray-200 flex items-center justify-between">
+        <div class="text-sm text-gray-500">
+          <%= raw pagy_info(@pagy) %>
+        </div>
+        <div>
+          <%= raw pagy_nav(@pagy) %>
+        </div>
+      </div>
+    </div>
+  </turbo-frame>
+</div>
