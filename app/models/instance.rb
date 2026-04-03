@@ -6,7 +6,7 @@ class Instance < ApplicationRecord
   validates :memory_gb, presence: true, numericality: { greater_than: 0 }
   validates :price_per_hour, presence: true, numericality: { greater_than_or_equal_to: 0 }
   validates :region, presence: true
-  validates :instance_type, uniqueness: { scope: [:provider_id, :region] }
+  validates :instance_type, uniqueness: { scope: [ :provider_id, :region ] }
 
   scope :by_provider, ->(slugs) {
     return all if slugs.blank?

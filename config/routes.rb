@@ -1,7 +1,7 @@
 Rails.application.routes.draw do
   root "instances#index"
 
-  resources :instances, only: [:index, :show]
+  resources :instances, only: [ :index, :show ]
   get "compare", to: "compare#show"
   get "charts", to: "charts#index"
   get "about", to: "pages#about"

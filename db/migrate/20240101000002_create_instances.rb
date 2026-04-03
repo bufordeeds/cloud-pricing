@@ -14,7 +14,7 @@ class CreateInstances < ActiveRecord::Migration[7.2]
       t.timestamps
     end
 
-    add_index :instances, [:provider_id, :instance_type, :region], unique: true
+    add_index :instances, [ :provider_id, :instance_type, :region ], unique: true
     add_index :instances, :vcpus
     add_index :instances, :memory_gb
     add_index :instances, :price_per_hour

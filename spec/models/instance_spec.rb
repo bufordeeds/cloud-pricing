@@ -34,7 +34,7 @@ RSpec.describe Instance, type: :model do
     end
 
     it "filters by provider" do
-      results = Instance.by_provider(["aws"])
+      results = Instance.by_provider([ "aws" ])
       expect(results).to include(@aws_general, @aws_compute, @aws_large)
       expect(results).not_to include(@gcp_general)
     end

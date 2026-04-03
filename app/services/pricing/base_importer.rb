@@ -51,7 +51,7 @@ module Pricing
 
       Instance.upsert_all(
         records,
-        unique_by: [:provider_id, :instance_type, :region]
+        unique_by: [ :provider_id, :instance_type, :region ]
       )
 
       records.size
