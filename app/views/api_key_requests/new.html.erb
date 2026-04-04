@@ -1,43 +1,303 @@
-<% content_for(:title, "Request API Access — CloudPricing") %>
+<% content_for(:title, "API Documentation — CloudPricing") %>
 
-<div class="max-w-lg mx-auto">
-  <h1 class="text-2xl font-bold text-gray-900 mb-2">Request API Access</h1>
-  <p class="text-gray-600 mb-6">
-    Get programmatic access to CloudPricing data. Submit your request and we'll review it — you'll receive an API key by email once approved.
+<div class="max-w-3xl mx-auto">
+  <h1 class="text-2xl font-bold text-gray-900 mb-2">API Documentation</h1>
+  <p class="text-gray-600 mb-8">
+    Programmatic access to cloud instance and LLM model pricing data. Read-only JSON API with Bearer token authentication.
   </p>
 
-  <%= form_with(model: @api_key, url: api_key_requests_path, class: "space-y-4") do |f| %>
-    <% if @api_key.errors.any? %>
-      <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded text-sm">
-        <ul class="list-disc list-inside">
-          <% @api_key.errors.full_messages.each do |msg| %>
-            <li><%= msg %></li>
-          <% end %>
-        </ul>
+  <%# ── Authentication ── %>
+  <section class="mb-10">
+    <h2 class="text-lg font-semibold text-gray-900 mb-3">Authentication</h2>
+    <p class="text-sm text-gray-600 mb-3">
+      All API requests require a Bearer token in the <code class="bg-gray-100 px-1.5 py-0.5 rounded text-xs">Authorization</code> header.
+    </p>
+    <div class="bg-gray-900 rounded-lg p-4 text-sm font-mono text-gray-200 overflow-x-auto">
+      curl -H "Authorization: Bearer cp_your_key_here" \<br>
+      &nbsp;&nbsp;https://cloudpricing.buford.dev/api/v1/llm_models
+    </div>
+    <p class="text-sm text-gray-500 mt-2">
+      Keys are issued via email after approval. Lost your key? Request a new one — old keys can be revoked.
+    </p>
+  </section>
+
+  <%# ── Base URL ── %>
+  <section class="mb-10">
+    <h2 class="text-lg font-semibold text-gray-900 mb-3">Base URL</h2>
+    <div class="bg-gray-100 rounded-lg px-4 py-2.5 font-mono text-sm text-gray-800">
+      https://cloudpricing.buford.dev/api/v1
+    </div>
+  </section>
+
+  <%# ── Rate Limits ── %>
+  <section class="mb-10">
+    <h2 class="text-lg font-semibold text-gray-900 mb-3">Rate Limits</h2>
+    <p class="text-sm text-gray-600 mb-3">
+      100 requests per minute per API key. Rate limit info is included in every response:
+    </p>
+    <div class="bg-white border border-gray-200 rounded-lg overflow-hidden">
+      <table class="min-w-full text-sm">
+        <thead class="bg-gray-50">
+          <tr>
+            <th class="px-4 py-2 text-left font-medium text-gray-500">Header</th>
+            <th class="px-4 py-2 text-left font-medium text-gray-500">Description</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-200">
+          <tr>
+            <td class="px-4 py-2 font-mono text-xs text-gray-800">X-RateLimit-Limit</td>
+            <td class="px-4 py-2 text-gray-600">Max requests per minute (100)</td>
+          </tr>
+          <tr>
+            <td class="px-4 py-2 font-mono text-xs text-gray-800">X-RateLimit-Remaining</td>
+            <td class="px-4 py-2 text-gray-600">Requests remaining in current window</td>
+          </tr>
+          <tr>
+            <td class="px-4 py-2 font-mono text-xs text-gray-800">Retry-After</td>
+            <td class="px-4 py-2 text-gray-600">Seconds to wait (only on 429 responses)</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <%# ── Response Format ── %>
+  <section class="mb-10">
+    <h2 class="text-lg font-semibold text-gray-900 mb-3">Response Format</h2>
+    <p class="text-sm text-gray-600 mb-3">
+      All responses are JSON. List endpoints return paginated results:
+    </p>
+    <div class="bg-gray-900 rounded-lg p-4 text-sm font-mono text-gray-200 overflow-x-auto">
+      <pre>{
+  "data": [ ... ],
+  "meta": {
+    "current_page": 1,
+    "total_pages": 12,
+    "total_count": 285,
+    "per_page": 25
+  }
+}</pre>
+    </div>
+    <p class="text-sm text-gray-500 mt-2">
+      Use <code class="bg-gray-100 px-1.5 py-0.5 rounded text-xs">page</code> and <code class="bg-gray-100 px-1.5 py-0.5 rounded text-xs">per_page</code> (max 100) query params to paginate.
+    </p>
+  </section>
+
+  <%# ── Endpoints ── %>
+  <section class="mb-10">
+    <h2 class="text-lg font-semibold text-gray-900 mb-4">Endpoints</h2>
+
+    <%# ── Instances ── %>
+    <div class="mb-8">
+      <div class="flex items-center gap-2 mb-2">
+        <span class="bg-green-100 text-green-800 text-xs font-bold px-2 py-0.5 rounded">GET</span>
+        <code class="text-sm font-mono text-gray-900">/api/v1/instances</code>
+      </div>
+      <p class="text-sm text-gray-600 mb-3">List cloud compute instances with optional filters.</p>
+      <div class="bg-white border border-gray-200 rounded-lg overflow-hidden mb-3">
+        <table class="min-w-full text-sm">
+          <thead class="bg-gray-50">
+            <tr>
+              <th class="px-4 py-2 text-left font-medium text-gray-500">Parameter</th>
+              <th class="px-4 py-2 text-left font-medium text-gray-500">Type</th>
+              <th class="px-4 py-2 text-left font-medium text-gray-500">Description</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-200">
+            <tr>
+              <td class="px-4 py-2 font-mono text-xs">providers[]</td>
+              <td class="px-4 py-2 text-gray-500">array</td>
+              <td class="px-4 py-2 text-gray-600">Filter by provider slug: <code class="text-xs bg-gray-100 px-1 rounded">aws</code>, <code class="text-xs bg-gray-100 px-1 rounded">gcp</code>, <code class="text-xs bg-gray-100 px-1 rounded">azure</code></td>
+            </tr>
+            <tr>
+              <td class="px-4 py-2 font-mono text-xs">q</td>
+              <td class="px-4 py-2 text-gray-500">string</td>
+              <td class="px-4 py-2 text-gray-600">Search instance type names</td>
+            </tr>
+            <tr>
+              <td class="px-4 py-2 font-mono text-xs">vcpus_min / vcpus_max</td>
+              <td class="px-4 py-2 text-gray-500">integer</td>
+              <td class="px-4 py-2 text-gray-600">Filter by vCPU count range</td>
+            </tr>
+            <tr>
+              <td class="px-4 py-2 font-mono text-xs">memory_min / memory_max</td>
+              <td class="px-4 py-2 text-gray-500">number</td>
+              <td class="px-4 py-2 text-gray-600">Filter by memory (GB) range</td>
+            </tr>
+            <tr>
+              <td class="px-4 py-2 font-mono text-xs">family</td>
+              <td class="px-4 py-2 text-gray-500">string</td>
+              <td class="px-4 py-2 text-gray-600">Filter by instance family</td>
+            </tr>
+            <tr>
+              <td class="px-4 py-2 font-mono text-xs">sort</td>
+              <td class="px-4 py-2 text-gray-500">string</td>
+              <td class="px-4 py-2 text-gray-600"><code class="text-xs bg-gray-100 px-1 rounded">price</code>, <code class="text-xs bg-gray-100 px-1 rounded">vcpus</code>, <code class="text-xs bg-gray-100 px-1 rounded">memory</code>, <code class="text-xs bg-gray-100 px-1 rounded">price_per_vcpu</code>, <code class="text-xs bg-gray-100 px-1 rounded">price_per_gb</code>, <code class="text-xs bg-gray-100 px-1 rounded">instance_type</code></td>
+            </tr>
+            <tr>
+              <td class="px-4 py-2 font-mono text-xs">direction</td>
+              <td class="px-4 py-2 text-gray-500">string</td>
+              <td class="px-4 py-2 text-gray-600"><code class="text-xs bg-gray-100 px-1 rounded">asc</code> (default) or <code class="text-xs bg-gray-100 px-1 rounded">desc</code></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="text-xs font-medium text-gray-500 mb-1">Example</p>
+      <div class="bg-gray-900 rounded-lg p-3 text-xs font-mono text-gray-200 overflow-x-auto">
+        curl -H "Authorization: Bearer cp_..." \<br>
+        &nbsp;&nbsp;"https://cloudpricing.buford.dev/api/v1/instances?providers[]=aws&vcpus_min=4&sort=price"
+      </div>
+    </div>
+
+    <%# ── Instance Detail ── %>
+    <div class="mb-8">
+      <div class="flex items-center gap-2 mb-2">
+        <span class="bg-green-100 text-green-800 text-xs font-bold px-2 py-0.5 rounded">GET</span>
+        <code class="text-sm font-mono text-gray-900">/api/v1/instances/:id</code>
+      </div>
+      <p class="text-sm text-gray-600">Returns a single instance by ID. Response wraps the object in <code class="bg-gray-100 px-1.5 py-0.5 rounded text-xs">data</code>.</p>
+    </div>
+
+    <%# ── LLM Models ── %>
+    <div class="mb-8">
+      <div class="flex items-center gap-2 mb-2">
+        <span class="bg-green-100 text-green-800 text-xs font-bold px-2 py-0.5 rounded">GET</span>
+        <code class="text-sm font-mono text-gray-900">/api/v1/llm_models</code>
+      </div>
+      <p class="text-sm text-gray-600 mb-3">List LLM models with pricing and capability info.</p>
+      <div class="bg-white border border-gray-200 rounded-lg overflow-hidden mb-3">
+        <table class="min-w-full text-sm">
+          <thead class="bg-gray-50">
+            <tr>
+              <th class="px-4 py-2 text-left font-medium text-gray-500">Parameter</th>
+              <th class="px-4 py-2 text-left font-medium text-gray-500">Type</th>
+              <th class="px-4 py-2 text-left font-medium text-gray-500">Description</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-200">
+            <tr>
+              <td class="px-4 py-2 font-mono text-xs">providers[]</td>
+              <td class="px-4 py-2 text-gray-500">array</td>
+              <td class="px-4 py-2 text-gray-600">Filter by provider slug: <code class="text-xs bg-gray-100 px-1 rounded">anthropic</code>, <code class="text-xs bg-gray-100 px-1 rounded">openai</code>, <code class="text-xs bg-gray-100 px-1 rounded">google</code>, <code class="text-xs bg-gray-100 px-1 rounded">meta</code>, <code class="text-xs bg-gray-100 px-1 rounded">mistral</code></td>
+            </tr>
+            <tr>
+              <td class="px-4 py-2 font-mono text-xs">q</td>
+              <td class="px-4 py-2 text-gray-500">string</td>
+              <td class="px-4 py-2 text-gray-600">Search model names</td>
+            </tr>
+            <tr>
+              <td class="px-4 py-2 font-mono text-xs">context_min / context_max</td>
+              <td class="px-4 py-2 text-gray-500">integer</td>
+              <td class="px-4 py-2 text-gray-600">Filter by context window size (tokens, in thousands)</td>
+            </tr>
+            <tr>
+              <td class="px-4 py-2 font-mono text-xs">sort</td>
+              <td class="px-4 py-2 text-gray-500">string</td>
+              <td class="px-4 py-2 text-gray-600"><code class="text-xs bg-gray-100 px-1 rounded">input_price</code>, <code class="text-xs bg-gray-100 px-1 rounded">output_price</code>, <code class="text-xs bg-gray-100 px-1 rounded">blended_price</code>, <code class="text-xs bg-gray-100 px-1 rounded">context</code>, <code class="text-xs bg-gray-100 px-1 rounded">name</code></td>
+            </tr>
+            <tr>
+              <td class="px-4 py-2 font-mono text-xs">direction</td>
+              <td class="px-4 py-2 text-gray-500">string</td>
+              <td class="px-4 py-2 text-gray-600"><code class="text-xs bg-gray-100 px-1 rounded">asc</code> (default) or <code class="text-xs bg-gray-100 px-1 rounded">desc</code></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="text-xs font-medium text-gray-500 mb-1">Example</p>
+      <div class="bg-gray-900 rounded-lg p-3 text-xs font-mono text-gray-200 overflow-x-auto">
+        curl -H "Authorization: Bearer cp_..." \<br>
+        &nbsp;&nbsp;"https://cloudpricing.buford.dev/api/v1/llm_models?providers[]=anthropic&sort=output_price"
+      </div>
+    </div>
+
+    <%# ── LLM Model Detail ── %>
+    <div class="mb-8">
+      <div class="flex items-center gap-2 mb-2">
+        <span class="bg-green-100 text-green-800 text-xs font-bold px-2 py-0.5 rounded">GET</span>
+        <code class="text-sm font-mono text-gray-900">/api/v1/llm_models/:id</code>
+      </div>
+      <p class="text-sm text-gray-600">Returns a single LLM model by ID.</p>
+    </div>
+
+    <%# ── Providers ── %>
+    <div class="mb-8">
+      <div class="flex items-center gap-2 mb-2">
+        <span class="bg-green-100 text-green-800 text-xs font-bold px-2 py-0.5 rounded">GET</span>
+        <code class="text-sm font-mono text-gray-900">/api/v1/providers</code>
+      </div>
+      <p class="text-sm text-gray-600">List cloud infrastructure providers (AWS, GCP, Azure) with instance counts.</p>
+    </div>
+
+    <%# ── LLM Providers ── %>
+    <div class="mb-8">
+      <div class="flex items-center gap-2 mb-2">
+        <span class="bg-green-100 text-green-800 text-xs font-bold px-2 py-0.5 rounded">GET</span>
+        <code class="text-sm font-mono text-gray-900">/api/v1/llm_providers</code>
+      </div>
+      <p class="text-sm text-gray-600">List LLM providers (Anthropic, OpenAI, Google, Meta, Mistral) with model counts.</p>
+    </div>
+  </section>
+
+  <%# ── Error Codes ── %>
+  <section class="mb-10">
+    <h2 class="text-lg font-semibold text-gray-900 mb-3">Error Codes</h2>
+    <div class="bg-white border border-gray-200 rounded-lg overflow-hidden">
+      <table class="min-w-full text-sm">
+        <thead class="bg-gray-50">
+          <tr>
+            <th class="px-4 py-2 text-left font-medium text-gray-500">Status</th>
+            <th class="px-4 py-2 text-left font-medium text-gray-500">Meaning</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-200">
+          <tr>
+            <td class="px-4 py-2 font-mono text-xs">401 Unauthorized</td>
+            <td class="px-4 py-2 text-gray-600">Missing, invalid, or revoked API key</td>
+          </tr>
+          <tr>
+            <td class="px-4 py-2 font-mono text-xs">404 Not Found</td>
+            <td class="px-4 py-2 text-gray-600">Resource doesn't exist</td>
+          </tr>
+          <tr>
+            <td class="px-4 py-2 font-mono text-xs">429 Too Many Requests</td>
+            <td class="px-4 py-2 text-gray-600">Rate limit exceeded — check <code class="text-xs bg-gray-100 px-1 rounded">Retry-After</code> header</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <%# ── Request Access Form ── %>
+  <section class="border-t border-gray-200 pt-10" id="request-access">
+    <h2 class="text-lg font-semibold text-gray-900 mb-2">Request Access</h2>
+    <p class="text-sm text-gray-600 mb-4">
+      Submit your request and you'll receive an API key by email once approved.
+    </p>
+
+    <%= form_with(model: @api_key, url: api_key_requests_path, class: "space-y-4 max-w-md") do |f| %>
+      <% if @api_key.errors.any? %>
+        <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded text-sm">
+          <ul class="list-disc list-inside">
+            <% @api_key.errors.full_messages.each do |msg| %>
+              <li><%= msg %></li>
+            <% end %>
+          </ul>
+        </div>
+      <% end %>
+
+      <div>
+        <%= f.label :name, "Your name", class: "block text-sm font-medium text-gray-700 mb-1" %>
+        <%= f.text_field :name, class: "w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 text-sm", placeholder: "Jane Smith" %>
+      </div>
+
+      <div>
+        <%= f.label :email, "Email address", class: "block text-sm font-medium text-gray-700 mb-1" %>
+        <%= f.email_field :email, class: "w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 text-sm", placeholder: "jane@example.com" %>
+      </div>
+
+      <div>
+        <%= f.submit "Request Access", class: "w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 font-medium text-sm cursor-pointer" %>
       </div>
     <% end %>
-
-    <div>
-      <%= f.label :name, "Your name", class: "block text-sm font-medium text-gray-700 mb-1" %>
-      <%= f.text_field :name, class: "w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 text-sm", placeholder: "Jane Smith" %>
-    </div>
-
-    <div>
-      <%= f.label :email, "Email address", class: "block text-sm font-medium text-gray-700 mb-1" %>
-      <%= f.email_field :email, class: "w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 text-sm", placeholder: "jane@example.com" %>
-    </div>
-
-    <div>
-      <%= f.submit "Request Access", class: "w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 font-medium text-sm cursor-pointer" %>
-    </div>
-  <% end %>
-
-  <div class="mt-8 bg-gray-100 rounded-md p-4 text-sm text-gray-600">
-    <h3 class="font-medium text-gray-900 mb-2">What you'll get</h3>
-    <ul class="space-y-1">
-      <li>Read-only JSON API for cloud instances and LLM model pricing</li>
-      <li>100 requests per minute rate limit</li>
-      <li>Bearer token authentication</li>
-    </ul>
-  </div>
+  </section>
 </div>
