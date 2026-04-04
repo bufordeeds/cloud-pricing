@@ -8,6 +8,7 @@ class ApiKeyRequestsController < ApplicationController
     @api_key.status = "pending"
 
     if @api_key.save
+      ApiKeyMailer.new_request(@api_key).deliver_now
       redirect_to thanks_api_key_requests_path
     else
       render :new, status: :unprocessable_entity

@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; color: #1a1a1a; line-height: 1.6; }
+    .container { max-width: 500px; margin: 0 auto; padding: 20px; }
+    .details { background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; padding: 16px; margin: 16px 0; }
+    .btn { display: inline-block; background: #2563eb; color: #ffffff; padding: 10px 20px; border-radius: 6px; text-decoration: none; font-weight: 500; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>New API Key Request</h2>
+
+    <div class="details">
+      <strong>Name:</strong> <%= @api_key.name %><br>
+      <strong>Email:</strong> <%= @api_key.email %><br>
+      <strong>Submitted:</strong> <%= @api_key.created_at.strftime("%B %d, %Y at %I:%M %p UTC") %>
+    </div>
+
+    <p><a href="<%= @admin_url %>" class="btn">Review in Admin</a></p>
+  </div>
+</body>
+</html>
