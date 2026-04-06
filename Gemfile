@@ -18,7 +18,7 @@ gem "chartkick"
 gem "groupdate"
 gem "httparty"
 gem "resend", "~> 0.17"
-gem "rack-cors", "~> 2.0"
+gem "rack-cors", "~> 3.0"
 
 group :development, :test do
   gem "debug", platforms: %i[ mri windows ], require: "debug/prelude"
