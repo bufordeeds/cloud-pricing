@@ -17,7 +17,7 @@ gem "pagy", "~> 9.0"
 gem "chartkick"
 gem "groupdate"
 gem "httparty"
-gem "resend", "~> 0.17"
+gem "resend", "~> 1.2"
 gem "rack-cors", "~> 2.0"
 
 group :development, :test do
